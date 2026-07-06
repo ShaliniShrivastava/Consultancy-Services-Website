@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import axios from "axios"; // 1. Axios ko import karna zaroori hai
+import axios from "axios"; // Ensure kijiye ye import sahi se ho
 
 const AuthContext = createContext();
 
@@ -22,29 +22,28 @@ export const AuthProvider = ({ children }) => {
       }
     }
     setLoading(false);
-  } , []);
+  }, []);
 
-  // 2. Login Function
+  // 2. Login Function (Aapka Purana Sahi Code)
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
   };
 
-  // 3. Logout Function (FIXED: Ab ye backend ko bhi logout request bhejega)
+  // 3. Logout Function (Bina kisi error ke pure frontend cleanup ke saath)
   const logout = async () => {
     try {
-      // Backend ke token/cookie clear karne ke liye request
-      // API_URL = .../api hai, toh ye automatically .../api/logout banega
+      // Backend par request bhejein, agar live par dikkat ho toh try-catch handle karega
       await axios.post(`${API_URL}/logout`, {}, { withCredentials: true });
     } catch (error) {
       console.error("Backend Logout Error:", error);
-    } finally {
-      // Kuch bhi error aaye ya na aaye, frontend se data clean hona hi chahiye:
-      setUser(null);
-      localStorage.removeItem("user");
-      localStorage.removeItem("token");
-      window.location.href = "/login"; // Login page par redirect
     }
+
+    // Frontend clean up hamesha chalega aur ye login par bhej dega
+    setUser(null);
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    window.location.href = "/login";
   };
 
   return (
@@ -54,7 +53,6 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-// Custom Hook use karne ke liye
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
